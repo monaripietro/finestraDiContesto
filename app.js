@@ -1,5 +1,4 @@
-// INSERIRAI QUI L'URL DI VERCEL DOPO IL DEPLOY (es. https://tuo-progetto.vercel.app/api/chat)
-const API_URL = "INSERISCI_URL_VERCEL_QUI"; 
+const API_URL = "/api/chat"; 
 
 const chatContainer = document.getElementById('chat-container');
 const userInput = document.getElementById('user-input');
@@ -14,18 +13,6 @@ let messages = [];
 // Stima educativa dei token: ~4 caratteri = 1 token
 function estimateTokens(text) {
     return Math.max(1, Math.ceil(text.length / 4));
-}
-
-// Risolve dinamicamente l'URL dell'API per consentire test locali senza configurazione manuale
-function getApiUrl() {
-    if (API_URL && API_URL !== "INSERISCI_URL_VERCEL_QUI") {
-        return API_URL;
-    }
-    // Se siamo su localhost o 127.0.0.1, facciamo il fallback automatico all'endpoint relativo
-    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "[::1]") {
-        return "/api/chat";
-    }
-    return null;
 }
 
 function updateUI() {
@@ -96,11 +83,9 @@ async function sendMessage() {
     const text = userInput.value.trim();
     if (!text) return;
 
-    const activeApiUrl = getApiUrl();
-
-    // Se stiamo testando in locale senza Vercel configurato, e non siamo su localhost, fermati.
-    if (!activeApiUrl) {
-        alert("Devi prima inserire l'URL di Vercel in app.js!");
+    // Se l'app è aperta via protocollo file:// (es. doppio click su index.html)
+    if (window.location.protocol === 'file:') {
+        alert("L'applicazione deve essere eseguita tramite un server web (es. con Live Server o vercel dev) per poter effettuare chiamate API relative.");
         return;
     }
 
@@ -118,7 +103,7 @@ async function sendMessage() {
     sendBtn.textContent = '...';
 
     try {
-        const response = await fetch(activeApiUrl, {
+        const response = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ messages: contextMessages })
