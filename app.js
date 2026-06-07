@@ -8,18 +8,19 @@ const contextLimitSelect = document.getElementById('context-limit');
 
 let messages = [];
 
+// Stima token: circa 4 caratteri per token
 function estimateTokens(text) {
     return Math.max(1, Math.ceil(text.length / 4));
 }
 
+// Ricalcola quali messaggi sono "dentro" o "fuori" dal contesto
 function updateUI() {
     const limit = parseInt(contextLimitSelect.value);
     let currentTokens = 0;
     
-    // Resetta lo stato di tutti i messaggi
     messages.forEach(m => m.inContext = false);
 
-    // Controlla i messaggi partendo dal più recente al più vecchio
+    // Controlla a ritroso: aggiunge messaggi finché c'è spazio
     for (let i = messages.length - 1; i >= 0; i--) {
         if (currentTokens + messages[i].tokens <= limit) {
             messages[i].inContext = true;
@@ -32,12 +33,19 @@ function updateUI() {
     renderMessages(currentTokens, limit);
 }
 
+// Crea l'elemento HTML per il singolo messaggio
 function createMessageElement(msg, inContext) {
     const msgDiv = document.createElement('div');
     msgDiv.className = `message ${msg.role} ${inContext ? '' : 'dropped'}`;
     
     const textDiv = document.createElement('div');
-    textDiv.textContent = msg.content;
+    
+    // Converte il Markdown in HTML solo per le risposte dell'IA
+    if (msg.role === 'assistant') {
+        textDiv.innerHTML = marked.parse(msg.content);
+    } else {
+        textDiv.textContent = msg.content;
+    }
     
     const badge = document.createElement('div');
     badge.className = 'token-badge';
@@ -48,18 +56,18 @@ function createMessageElement(msg, inContext) {
     return msgDiv;
 }
 
+// Disegna l'intera chat
 function renderMessages(currentTokens, limit) {
     chatContainer.innerHTML = '';
     
-    // Separiamo i messaggi attivi da quelli fuori contesto
     const droppedMessages = messages.filter(m => !m.inContext);
     const activeMessages = messages.filter(m => m.inContext);
 
-    // 1. Renderizza i messaggi usciti dalla finestra (in alto)
+    // 1. Stampa i messaggi dimenticati in alto (opachi)
     if (droppedMessages.length > 0) {
         const droppedHeader = document.createElement('div');
         droppedHeader.className = 'dropped-header';
-        droppedHeader.textContent = '↑ Questa parte è uscita dalla finestra di contesto ↑';
+        droppedHeader.textContent = '↑ Dimenticati dall\'IA (fuori contesto) ↑';
         chatContainer.appendChild(droppedHeader);
 
         droppedMessages.forEach(msg => {
@@ -67,11 +75,10 @@ function renderMessages(currentTokens, limit) {
         });
     }
 
-    // 2. Crea il BOX VISIVO della Finestra di Contesto
+    // 2. Stampa il box della finestra di contesto con i messaggi attivi
     if (activeMessages.length > 0) {
         const windowBox = document.createElement('div');
         
-        // Calcola il colore in base al riempimento
         const fillPercentage = currentTokens / limit;
         let colorClass = 'green';
         if (fillPercentage >= 0.8) colorClass = 'red';
@@ -79,13 +86,26 @@ function renderMessages(currentTokens, limit) {
         
         windowBox.className = `context-window-box ${colorClass}`;
         
-        // Intestazione del box che scende
+        // Header del box e barra di progresso
         const windowHeader = document.createElement('div');
         windowHeader.className = 'context-window-header';
-        windowHeader.innerHTML = `⬇ FINESTRA DI CONTESTO (${currentTokens} / ${limit} TOKEN) ⬇`;
+        
+        const headerText = document.createElement('div');
+        headerText.className = 'header-text';
+        headerText.innerHTML = `⬇ FINESTRA DI CONTESTO ATTIVA (${currentTokens} / ${limit} TOKEN) ⬇`;
+        
+        const progressContainer = document.createElement('div');
+        progressContainer.className = 'progress-container';
+        
+        const progressBar = document.createElement('div');
+        progressBar.className = `progress-bar ${colorClass}`;
+        progressBar.style.width = `${Math.min(100, fillPercentage * 100)}%`;
+        
+        progressContainer.appendChild(progressBar);
+        windowHeader.appendChild(headerText);
+        windowHeader.appendChild(progressContainer);
         windowBox.appendChild(windowHeader);
 
-        // Inserisci i messaggi attivi DENTRO il box
         activeMessages.forEach(msg => {
             windowBox.appendChild(createMessageElement(msg, true));
         });
@@ -93,10 +113,10 @@ function renderMessages(currentTokens, limit) {
         chatContainer.appendChild(windowBox);
     }
     
-    // Auto-scroll verso il basso
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
+// Invia il messaggio al backend Serverless
 async function sendMessage() {
     const text = userInput.value.trim();
     if (!text) return;
@@ -112,6 +132,7 @@ async function sendMessage() {
     userInput.value = '';
     updateUI();
 
+    // Estrae e invia SOLO i messaggi che si trovano all'interno del contesto
     const contextMessages = messages
         .filter(m => m.inContext)
         .map(m => ({ role: m.role, content: m.content }));
@@ -132,8 +153,6 @@ async function sendMessage() {
             const botReply = data.choices[0].message.content;
             const botTokens = estimateTokens(botReply);
             messages.push({ role: 'assistant', content: botReply, tokens: botTokens, inContext: true });
-        } else {
-            console.error("API Error:", data);
         }
     } catch (error) {
         console.error("Network Error:", error);

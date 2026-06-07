@@ -92,11 +92,6 @@ header h1 {
     border-color: #6366f1;
 }
 
-/* La status bar in alto è stata rimossa visivamente perché ora integrata nel box dinamico */
-.status-bar {
-    display: none;
-}
-
 #chat-container {
     flex-grow: 1;
     overflow-y: auto;
@@ -104,7 +99,8 @@ header h1 {
     background-color: #f8fafc;
     display: flex;
     flex-direction: column;
-    gap: 8px; /* ridotto per contenere meglio i margini dei messaggi */
+    scroll-behavior: smooth;
+    gap: 8px;
 }
 
 .message {
@@ -138,7 +134,33 @@ header h1 {
     border-bottom-left-radius: 4px;
 }
 
-/* Stile per i messaggi usciti dalla finestra di contesto (DIMENTICATI) */
+/* Stili extra per il Markdown reso */
+.message.assistant p {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+.message.assistant p:last-child {
+    margin-bottom: 0;
+}
+.message.assistant pre {
+    background: #f1f5f9;
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+    border: 1px solid #e2e8f0;
+    margin: 8px 0;
+}
+.message.assistant code {
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9em;
+    border: 1px solid #e2e8f0;
+    color: #e11d48;
+}
+
+/* Messaggi fuori dalla finestra */
 .dropped-header {
     text-align: center;
     color: #94a3b8;
@@ -155,13 +177,13 @@ header h1 {
 }
 
 .message.dropped {
-    background-color: rgba(243, 244, 246, 0.6);
-    color: #9ca3af;
+    opacity: 0.45;
+    filter: grayscale(100%);
     border: 1px dashed #d1d5db;
-    opacity: 0.55;
+    background-color: rgba(243, 244, 246, 0.6);
     box-shadow: none;
     align-self: center;
-    max-width: 90%;
+    max-width: 85%;
 }
 
 .message.dropped .token-badge {
@@ -170,7 +192,7 @@ header h1 {
     box-shadow: none;
 }
 
-/* --- NUOVO: IL BOX DELLA FINESTRA DI CONTESTO --- */
+/* IL BOX DELLA FINESTRA DI CONTESTO */
 .context-window-box {
     border: 3px solid #cbd5e1;
     border-radius: 20px;
@@ -184,7 +206,6 @@ header h1 {
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Colori dinamici del box basati sul riempimento */
 .context-window-box.green {
     border-color: var(--color-green);
     background-color: rgba(16, 185, 129, 0.02);
@@ -215,13 +236,46 @@ header h1 {
 .context-window-header {
     text-align: center;
     font-weight: 700;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
+    font-size: 0.8rem;
+    opacity: 0.9;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.header-text {
+    letter-spacing: 0.075em;
     text-transform: uppercase;
     font-size: 0.8rem;
-    letter-spacing: 0.075em;
-    border-bottom: 2px dashed currentColor;
-    padding-bottom: 12px;
-    opacity: 0.9;
+}
+
+/* La barra di progresso integrata nel box */
+.progress-container {
+    width: 80%;
+    margin: 0 auto;
+    height: 8px;
+    background-color: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.progress-bar {
+    height: 100%;
+    transition: width 0.4s ease, background-color 0.4s ease;
+}
+
+.progress-bar.green {
+    background-color: var(--color-green);
+}
+
+.progress-bar.yellow {
+    background-color: var(--color-yellow);
+}
+
+.progress-bar.red {
+    background-color: var(--color-red);
 }
 
 .token-badge {
@@ -253,6 +307,7 @@ header h1 {
     align-items: center;
     gap: 12px;
     box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.02);
+    z-index: 10;
 }
 
 #user-input {
