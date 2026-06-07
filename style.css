@@ -14,7 +14,8 @@
     --border-color: #e5e7eb;
 }
 
-* {
+/* Reset e Box Sizing globale per evitare overflow nativi */
+*, *::before, *::after {
     box-sizing: border-box;
 }
 
@@ -25,11 +26,13 @@ body {
     display: flex;
     justify-content: center;
     height: 100vh;
+    height: 100dvh; /* Sfrutta la dimensione dinamica reale escludendo le barre del browser */
     align-items: center;
     color: var(--text-main);
     -webkit-font-smoothing: antialiased;
 }
 
+/* Layout principale: su desktop mantiene il box, su mobile diventa full screen */
 .app-container {
     width: 100%;
     max-width: 850px;
@@ -51,6 +54,7 @@ header {
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    z-index: 20;
 }
 
 header h1 {
@@ -103,6 +107,7 @@ header h1 {
     gap: 8px;
 }
 
+/* Messaggi standard */
 .message {
     padding: 14px 20px;
     border-radius: 16px;
@@ -134,7 +139,7 @@ header h1 {
     border-bottom-left-radius: 4px;
 }
 
-/* Stili extra per il Markdown reso */
+/* Markdown Rendering */
 .message.assistant p {
     margin-top: 0;
     margin-bottom: 10px;
@@ -160,7 +165,7 @@ header h1 {
     color: #e11d48;
 }
 
-/* Messaggi fuori dalla finestra */
+/* Messaggi fuori dalla finestra (Dimenticati) */
 .dropped-header {
     text-align: center;
     color: #94a3b8;
@@ -196,8 +201,8 @@ header h1 {
 .context-window-box {
     border: 3px solid #cbd5e1;
     border-radius: 20px;
-    padding: 24px 20px 12px 20px;
-    margin-top: 15px;
+    padding: 0px 20px 12px 20px;
+    margin-top: 10px;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -211,37 +216,50 @@ header h1 {
     background-color: rgba(16, 185, 129, 0.02);
     box-shadow: 0 10px 25px rgba(16, 185, 129, 0.05);
 }
-.context-window-box.green .context-window-header {
-    color: var(--color-green);
-}
-
 .context-window-box.yellow {
     border-color: var(--color-yellow);
     background-color: rgba(245, 158, 11, 0.02);
     box-shadow: 0 10px 25px rgba(245, 158, 11, 0.05);
 }
-.context-window-box.yellow .context-window-header {
-    color: #d97706;
-}
-
 .context-window-box.red {
     border-color: var(--color-red);
     background-color: rgba(239, 68, 68, 0.02);
     box-shadow: 0 10px 25px rgba(239, 68, 68, 0.05);
 }
-.context-window-box.red .context-window-header {
-    color: var(--color-red);
-}
 
+/* RISOLUZIONE MOBILE: L'header diventa STICKY (Fisso in alto durante lo scroll) */
 .context-window-header {
+    position: sticky;
+    top: -30px; /* Si ancora perfettamente al top del chat container padding */
+    background: #ffffff; /* Copre i messaggi che scorrono sotto */
+    z-index: 10;
+    margin-left: -20px;
+    margin-right: -20px;
+    padding: 18px 20px;
+    border-bottom: 2px dashed #cbd5e1;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
     text-align: center;
     font-weight: 700;
-    margin-bottom: 25px;
     font-size: 0.8rem;
-    opacity: 0.9;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
     display: flex;
     flex-direction: column;
     gap: 8px;
+    transition: all 0.4s ease;
+}
+
+.context-window-box.green .context-window-header {
+    border-bottom-color: var(--color-green);
+    color: var(--color-green);
+}
+.context-window-box.yellow .context-window-header {
+    border-bottom-color: var(--color-yellow);
+    color: #d97706;
+}
+.context-window-box.red .context-window-header {
+    border-bottom-color: var(--color-red);
+    color: var(--color-red);
 }
 
 .header-text {
@@ -250,9 +268,9 @@ header h1 {
     font-size: 0.8rem;
 }
 
-/* La barra di progresso integrata nel box */
+/* La barra di progresso interna al box */
 .progress-container {
-    width: 80%;
+    width: 90%;
     margin: 0 auto;
     height: 8px;
     background-color: #e2e8f0;
@@ -260,24 +278,15 @@ header h1 {
     overflow: hidden;
     box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
 }
-
 .progress-bar {
     height: 100%;
     transition: width 0.4s ease, background-color 0.4s ease;
 }
+.progress-bar.green { background-color: var(--color-green); }
+.progress-bar.yellow { background-color: var(--color-yellow); }
+.progress-bar.red { background-color: var(--color-red); }
 
-.progress-bar.green {
-    background-color: var(--color-green);
-}
-
-.progress-bar.yellow {
-    background-color: var(--color-yellow);
-}
-
-.progress-bar.red {
-    background-color: var(--color-red);
-}
-
+/* Badge dei Token */
 .token-badge {
     position: absolute;
     top: -10px;
@@ -291,7 +300,6 @@ header h1 {
     box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2);
     letter-spacing: -0.01em;
 }
-
 .message.user .token-badge {
     left: -10px;
     right: auto;
@@ -299,6 +307,7 @@ header h1 {
     box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
 }
 
+/* Input area inferiore */
 .input-area {
     display: flex;
     padding: 20px 24px;
@@ -307,32 +316,29 @@ header h1 {
     align-items: center;
     gap: 12px;
     box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.02);
-    z-index: 10;
+    z-index: 20;
 }
-
 #user-input {
     flex-grow: 1;
     resize: none;
     padding: 14px 16px;
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    height: 52px;
+    height: 48px;
     font-family: inherit;
-    font-size: 0.95rem;
+    font-size: 16px; /* 16px previene lo zoom forzato su iOS */
     outline: none;
     transition: all 0.2s;
     background-color: #f9fafb;
 }
-
 #user-input:focus {
     border-color: var(--primary);
     background-color: #ffffff;
     box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
 }
-
 #send-btn {
     padding: 0 24px;
-    height: 52px;
+    height: 48px;
     background: #10b981;
     color: white;
     border: none;
@@ -343,17 +349,14 @@ header h1 {
     transition: all 0.2s;
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
 }
-
 #send-btn:hover {
     background: #059669;
     box-shadow: 0 6px 16px rgba(16, 185, 129, 0.25);
     transform: translateY(-1px);
 }
-
 #send-btn:active {
     transform: translateY(0);
 }
-
 #send-btn:disabled {
     background: #9ca3af;
     cursor: not-allowed;
@@ -365,16 +368,90 @@ header h1 {
 #chat-container::-webkit-scrollbar {
     width: 6px;
 }
-
 #chat-container::-webkit-scrollbar-track {
     background: transparent;
 }
-
 #chat-container::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.1);
     border-radius: 3px;
 }
-
 #chat-container::-webkit-scrollbar-thumb:hover {
     background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* ==========================================
+   MEDIA QUERY SPECIFICA PER SMARTPHONE
+   ========================================== */
+@media (max-width: 768px) {
+    body {
+        background: white;
+    }
+
+    .app-container {
+        height: 100vh;
+        height: 100dvh; /* Sfrutta la dimensione dinamica reale escludendo le barre del browser */
+        border-radius: 0;
+        box-shadow: none;
+        border: none;
+    }
+
+    header {
+        padding: 12px 16px;
+    }
+
+    header h1 {
+        font-size: 1.1rem;
+    }
+
+    .controls label {
+        font-size: 0.8rem;
+    }
+
+    #chat-container {
+        padding: 15px 12px;
+    }
+
+    .message {
+        max-width: 85%; /* Più largo su mobile per ottimizzare lo spazio di lettura */
+        padding: 10px 14px;
+        font-size: 0.9rem;
+        margin-bottom: 12px;
+        border-radius: 12px;
+    }
+
+    .context-window-box {
+        padding: 0 12px 8px 12px;
+        border-radius: 16px;
+    }
+
+    .context-window-header {
+        font-size: 0.75rem;
+        padding: 12px 10px;
+        top: -15px; /* Si ancora alla nuova altezza del padding */
+        margin-left: -12px;
+        margin-right: -12px;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .progress-container {
+        width: 100%;
+    }
+
+    .input-area {
+        padding: 10px 12px;
+    }
+
+    #user-input {
+        height: 42px;
+        padding: 8px 12px;
+        border-radius: 8px;
+    }
+
+    #send-btn {
+        height: 42px;
+        padding: 0 16px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+    }
 }
