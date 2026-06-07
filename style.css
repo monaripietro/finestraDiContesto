@@ -1,11 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 :root {
-    --bg-green: #e2f0d9;
-    --bg-yellow: #fff2cc;
-    --bg-red: #fce4e4;
+    --color-green: #10b981;
+    --color-yellow: #f59e0b;
+    --color-red: #ef4444;
     --bg-white: #fafafa;
-    --chat-bg: var(--bg-green);
     
     /* Modern UI colors */
     --primary: #4f46e5;
@@ -13,10 +12,6 @@
     --text-main: #1f2937;
     --text-muted: #6b7280;
     --border-color: #e5e7eb;
-    
-    --status-green-text: #2e7d32;
-    --status-yellow-text: #b78103;
-    --status-red-text: #c62828;
 }
 
 * {
@@ -97,40 +92,19 @@ header h1 {
     border-color: #6366f1;
 }
 
+/* La status bar in alto è stata rimossa visivamente perché ora integrata nel box dinamico */
 .status-bar {
-    padding: 12px;
-    text-align: center;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    letter-spacing: -0.01em;
-}
-
-.status-bar.green {
-    background-color: var(--bg-green);
-    color: var(--status-green-text);
-}
-
-.status-bar.yellow {
-    background-color: var(--bg-yellow);
-    color: var(--status-yellow-text);
-}
-
-.status-bar.red {
-    background-color: var(--bg-red);
-    color: var(--status-red-text);
+    display: none;
 }
 
 #chat-container {
     flex-grow: 1;
     overflow-y: auto;
     padding: 30px 24px;
-    background-color: var(--chat-bg);
-    transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: #f8fafc;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 8px; /* ridotto per contenere meglio i margini dei messaggi */
 }
 
 .message {
@@ -145,6 +119,7 @@ header h1 {
     border: 1px solid rgba(0, 0, 0, 0.05);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     word-break: break-word;
+    margin-bottom: 20px;
 }
 
 .message.user {
@@ -153,7 +128,7 @@ header h1 {
     color: white;
     border-color: transparent;
     border-bottom-right-radius: 4px;
-    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.15);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.1);
 }
 
 .message.assistant {
@@ -163,20 +138,90 @@ header h1 {
     border-bottom-left-radius: 4px;
 }
 
-/* Stile per i messaggi usciti dalla finestra di contesto */
+/* Stile per i messaggi usciti dalla finestra di contesto (DIMENTICATI) */
+.dropped-header {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 20px 0 15px 0;
+    letter-spacing: 0.05em;
+    background: #f1f5f9;
+    padding: 8px 16px;
+    border-radius: 20px;
+    align-self: center;
+    border: 1px solid #e2e8f0;
+}
+
 .message.dropped {
     background-color: rgba(243, 244, 246, 0.6);
     color: #9ca3af;
     border: 1px dashed #d1d5db;
     opacity: 0.55;
     box-shadow: none;
+    align-self: center;
+    max-width: 90%;
 }
 
-.message.dropped.user {
-    background-color: rgba(243, 244, 246, 0.6);
-    color: #9ca3af;
-    border: 1px dashed #d1d5db;
+.message.dropped .token-badge {
+    background: #9ca3af;
+    color: white;
     box-shadow: none;
+}
+
+/* --- NUOVO: IL BOX DELLA FINESTRA DI CONTESTO --- */
+.context-window-box {
+    border: 3px solid #cbd5e1;
+    border-radius: 20px;
+    padding: 24px 20px 12px 20px;
+    margin-top: 15px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Colori dinamici del box basati sul riempimento */
+.context-window-box.green {
+    border-color: var(--color-green);
+    background-color: rgba(16, 185, 129, 0.02);
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.05);
+}
+.context-window-box.green .context-window-header {
+    color: var(--color-green);
+}
+
+.context-window-box.yellow {
+    border-color: var(--color-yellow);
+    background-color: rgba(245, 158, 11, 0.02);
+    box-shadow: 0 10px 25px rgba(245, 158, 11, 0.05);
+}
+.context-window-box.yellow .context-window-header {
+    color: #d97706;
+}
+
+.context-window-box.red {
+    border-color: var(--color-red);
+    background-color: rgba(239, 68, 68, 0.02);
+    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.05);
+}
+.context-window-box.red .context-window-header {
+    color: var(--color-red);
+}
+
+.context-window-header {
+    text-align: center;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.075em;
+    border-bottom: 2px dashed currentColor;
+    padding-bottom: 12px;
+    opacity: 0.9;
 }
 
 .token-badge {
@@ -200,12 +245,6 @@ header h1 {
     box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
 }
 
-.message.dropped .token-badge {
-    background: #9ca3af;
-    color: white;
-    box-shadow: none;
-}
-
 .input-area {
     display: flex;
     padding: 20px 24px;
@@ -213,6 +252,7 @@ header h1 {
     border-top: 1px solid var(--border-color);
     align-items: center;
     gap: 12px;
+    box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.02);
 }
 
 #user-input {
