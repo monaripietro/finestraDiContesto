@@ -513,6 +513,12 @@ header h1 {
     color: var(--primary);
 }
 
+.modal-list li a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: underline;
+}
+
 #disclaimer-btn {
     width: 100%;
     padding: 14px 24px;
