@@ -5,6 +5,8 @@ const chatContainer = document.getElementById('chat-container');
 const userInput = document.getElementById('user-input');
 const sendBtn = document.getElementById('send-btn');
 const contextLimitSelect = document.getElementById('context-limit');
+const disclaimerOverlay = document.getElementById('disclaimer-overlay');
+const disclaimerBtn = document.getElementById('disclaimer-btn');
 
 let messages = [];
 
@@ -171,3 +173,7 @@ userInput.addEventListener('keypress', (e) => {
     }
 });
 contextLimitSelect.addEventListener('change', updateUI);
+
+disclaimerBtn.addEventListener('click', () => {
+    disclaimerOverlay.classList.add('hidden');
+});
